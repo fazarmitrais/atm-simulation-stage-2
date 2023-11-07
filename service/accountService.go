@@ -53,7 +53,6 @@ func (s *Service) Withdraw(ctx context.Context, accountNumber string, withdrawAm
 		return nil, responseFormatter.New(http.StatusBadRequest, fmt.Sprintf("Insufficient balance $%0.f", withdrawAmount), true)
 	}
 	accFromDb.Balance -= withdrawAmount
-	// TODO update balance
 	return accFromDb.ToAccountResponse(), nil
 }
 
