@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/fazarmitrais/atm-simulation-stage-2/domain/account/entity"
+	trxEntity "github.com/fazarmitrais/atm-simulation-stage-2/domain/transaction/entity"
 	"github.com/fazarmitrais/atm-simulation-stage-2/lib/responseFormatter"
 )
 
@@ -53,13 +54,13 @@ func (s *Service) Withdraw(ctx context.Context, accountNumber string, withdrawAm
 		return nil, responseFormatter.New(http.StatusBadRequest, fmt.Sprintf("Insufficient balance $%0.f", withdrawAmount), true)
 	}
 	accFromDb.Balance -= withdrawAmount
-	return accFromDb.ToAccountResponse(), nil
-}
-
-func (s *Service) BalanceCheck(ctx context.Context, acctNbr string) (*entity.AccountResponse, *responseFormatter.ResponseFormatter) {
-	accFromDb, err := s.getAndValidateByAccountNumber(ctx, acctNbr)
+	errl := s.CreateTransactionHistory(trxEntity.Transaction{
+		AccountNumber: accountNumber,
+		Amount:        withdrawAmount,
+		Type:          trxEntity.TYPE_WITHDRAWAL,
+	})
 	if err != nil {
-		return nil, err
+		fmt.Printf("Error when creating transaction history: %v \n", errl)
 	}
 	return accFromDb.ToAccountResponse(), nil
 }
@@ -117,7 +118,24 @@ func (s *Service) Transfer(ctx context.Context, transfer entity.Transfer) (*enti
 	}
 	fromAccount.Balance -= transfer.Amount
 	toAccount.Balance += transfer.Amount
+	errl := s.CreateTransactionHistory(trxEntity.Transaction{
+		AccountNumber:           fromAccount.AccountNumber,
+		TransferToAccountNumber: toAccount.AccountNumber,
+		Amount:                  transfer.Amount,
+		Type:                    trxEntity.TYPE_TRANSFER,
+	})
+	if err != nil {
+		fmt.Printf("Error when creating transaction history: %v \n", errl)
+	}
 	return fromAccount.ToAccountResponse(), nil
+}
+
+func (s *Service) BalanceCheck(ctx context.Context, acctNbr string) (*entity.AccountResponse, *responseFormatter.ResponseFormatter) {
+	accFromDb, err := s.getAndValidateByAccountNumber(ctx, acctNbr)
+	if err != nil {
+		return nil, err
+	}
+	return accFromDb.ToAccountResponse(), nil
 }
 
 func (s *Service) Import(ctx context.Context) error {

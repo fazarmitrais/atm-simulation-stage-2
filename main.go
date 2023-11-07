@@ -10,6 +10,7 @@ import (
 	"github.com/fazarmitrais/atm-simulation-stage-2/delivery/menu"
 	accountCsv "github.com/fazarmitrais/atm-simulation-stage-2/domain/account/repository/csv"
 	accountMapdatastore "github.com/fazarmitrais/atm-simulation-stage-2/domain/account/repository/mapDatastore"
+	transactionMapdatastore "github.com/fazarmitrais/atm-simulation-stage-2/domain/transaction/repository/mapDatastore"
 	"github.com/fazarmitrais/atm-simulation-stage-2/service"
 	"github.com/joho/godotenv"
 )
@@ -22,8 +23,9 @@ func main() {
 	flag.StringVar(&path, "path", "", "Path to directory")
 	flag.Parse()
 	acctMap := accountMapdatastore.NewMapDatastore()
+	trxMap := transactionMapdatastore.NewMapDatastore()
 	acctCsv := accountCsv.NewCSV(path)
-	svc := service.NewService(acctMap, acctCsv)
+	svc := service.NewService(acctMap, acctCsv, trxMap)
 	importDataFromCSV(c, path, svc)
 	m := menu.NewMenu(svc)
 	m.Start()

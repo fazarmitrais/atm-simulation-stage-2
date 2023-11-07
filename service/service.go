@@ -5,16 +5,18 @@ import (
 
 	"github.com/fazarmitrais/atm-simulation-stage-2/domain/account/entity"
 	"github.com/fazarmitrais/atm-simulation-stage-2/domain/account/repository"
+	trxRepository "github.com/fazarmitrais/atm-simulation-stage-2/domain/transaction/repository"
 	"github.com/fazarmitrais/atm-simulation-stage-2/lib/responseFormatter"
 )
 
 type Service struct {
-	AccountRepository    repository.AccountRepository
-	AccountCsvRepository repository.AccountCsvRepository
+	AccountRepository     repository.AccountRepository
+	AccountCsvRepository  repository.AccountCsvRepository
+	TransactionRepository trxRepository.TransactionRepository
 }
 
-func NewService(accountRepository repository.AccountRepository, accountCsvRepository repository.AccountCsvRepository) *Service {
-	return &Service{accountRepository, accountCsvRepository}
+func NewService(accountRepository repository.AccountRepository, accountCsvRepository repository.AccountCsvRepository, transactionRepository trxRepository.TransactionRepository) *Service {
+	return &Service{accountRepository, accountCsvRepository, transactionRepository}
 }
 
 type ServiceInterface interface {
