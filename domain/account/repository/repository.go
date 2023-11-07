@@ -1,9 +1,13 @@
 package repository
 
-import "github.com/fazarmitrais/atm-simulation-stage-2/domain/account/entity"
+import (
+	"context"
+
+	"github.com/fazarmitrais/atm-simulation-stage-2/domain/account/entity"
+)
 
 type AccountRepository interface {
-	Store(accounts []*entity.Account) error
-	GetByAccountNumber(accountNumber string) (*entity.Account, error)
-	GetAll() ([]*entity.Account, error)
+	Store(ctx context.Context, accounts []*entity.Account) error
+	GetByAccountNumber(ctx context.Context, accountNumber string) (*entity.Account, error)
+	GetAll(ctx context.Context) ([]*entity.Account, error)
 }

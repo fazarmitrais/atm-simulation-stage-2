@@ -1,6 +1,10 @@
 package mapdatastore
 
-import "github.com/fazarmitrais/atm-simulation-stage-2/domain/account/entity"
+import (
+	"context"
+
+	"github.com/fazarmitrais/atm-simulation-stage-2/domain/account/entity"
+)
 
 type MapDatastore struct {
 	Account map[string]*entity.Account
@@ -12,18 +16,18 @@ func NewMapDatastore() *MapDatastore {
 	return m
 }
 
-func (m *MapDatastore) Store(accounts []*entity.Account) error {
+func (m *MapDatastore) Store(ctx context.Context, accounts []*entity.Account) error {
 	for _, account := range accounts {
 		m.Account[account.AccountNumber] = account
 	}
 	return nil
 }
 
-func (m *MapDatastore) GetByAccountNumber(accountNumber string) (*entity.Account, error) {
+func (m *MapDatastore) GetByAccountNumber(ctx context.Context, accountNumber string) (*entity.Account, error) {
 	return m.Account[accountNumber], nil
 }
 
-func (m *MapDatastore) GetAll() ([]*entity.Account, error) {
+func (m *MapDatastore) GetAll(ctx context.Context) ([]*entity.Account, error) {
 	var accounts []*entity.Account
 	for _, account := range m.Account {
 		accounts = append(accounts, account)
