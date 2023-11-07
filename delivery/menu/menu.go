@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/fazarmitrais/atm-simulation-stage-2/domain/account/entity"
+	trxEntity "github.com/fazarmitrais/atm-simulation-stage-2/domain/transaction/entity"
 	"github.com/fazarmitrais/atm-simulation-stage-2/service"
 )
 
@@ -54,7 +55,8 @@ func (m *Menu) TransactionScreen(c context.Context) {
 		fmt.Println("1. Withdraw")
 		fmt.Println("2. Fund Transfer")
 		fmt.Println("3. Balance Check")
-		fmt.Println("4. Exit")
+		fmt.Println("4. Get Transaction History")
+		fmt.Println("5. Exit")
 		var input int
 		fmt.Scanln(&input)
 		switch input {
@@ -65,11 +67,33 @@ func (m *Menu) TransactionScreen(c context.Context) {
 		case 3:
 			m.BalanceCheck(c)
 		case 4:
+			m.GetLastTransaction(c)
+		case 5:
 			m.Exit()
 		default:
 			fmt.Println("Invalid Input")
 		}
 	}
+}
+
+func (m *Menu) GetLastTransaction(c context.Context) {
+	fmt.Println()
+	fmt.Println("___Last Transaction___")
+	trxs, err := m.service.GetLastTransaction(c, *m.accountNumber, 10)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	for _, t := range trxs {
+		trfTo := ""
+		if t.Type == trxEntity.TYPE_TRANSFER {
+			trfTo = fmt.Sprintf("Transfer to : %s, ", t.TransferToAccountNumber)
+		}
+		fmt.Printf("Transaction type : %s, %sAmount: $%0.f, Transaction date : %s \n", t.Type, trfTo, t.Amount, t.Date.Format("2006-01-02 15:04 AM"))
+	}
+	fmt.Println()
+	fmt.Println("Press any key to return to the menu screen")
+	fmt.Scanln()
 }
 
 func (m *Menu) BalanceCheck(c context.Context) {
