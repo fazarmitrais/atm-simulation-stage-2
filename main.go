@@ -5,37 +5,40 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
+	"strings"
 
-	"github.com/fazarmitrais/atm-simulation-stage-2/delivery/rest"
+	"github.com/fazarmitrais/atm-simulation-stage-2/delivery/menu"
 	accountCsv "github.com/fazarmitrais/atm-simulation-stage-2/domain/account/repository/csv"
 	accountMapdatastore "github.com/fazarmitrais/atm-simulation-stage-2/domain/account/repository/mapDatastore"
 	"github.com/fazarmitrais/atm-simulation-stage-2/service"
-	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
 func main() {
 	envInit()
-	var path string
 	c := context.Background()
+	fmt.Println("Welcome to the atm simulation")
+	var path string
 	flag.StringVar(&path, "path", "", "Path to directory")
 	flag.Parse()
 	acctMap := accountMapdatastore.NewMapDatastore()
 	acctCsv := accountCsv.NewCSV(path)
 	svc := service.NewService(acctMap, acctCsv)
-	if path != "" {
-		err := svc.Import(c)
-		if err != nil {
-			log.Fatalf("Error importing : %v", err)
-		}
-		fmt.Println("Successfully imported data from csv: ", path)
+	importDataFromCSV(c, path, svc)
+	m := menu.NewMenu(svc)
+	m.Start()
+}
+
+func importDataFromCSV(c context.Context, path string, svc *service.Service) {
+	if strings.TrimSpace(path) == "" {
+		log.Fatalln("Please provide correct csv file path to import data")
 	}
-	re := rest.New(svc)
-	m := mux.NewRouter()
-	re.Register(m)
-	fmt.Println("App is running on port 8080")
-	http.ListenAndServe(":8080", m)
+	fmt.Println("Importing data from csv file...")
+	err := svc.Import(c)
+	if err != nil {
+		log.Fatalf("Error importing : %v", err)
+	}
+	fmt.Println("Successfully imported data from csv: ", path)
 }
 
 func envInit() {
